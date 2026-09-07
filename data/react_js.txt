@@ -1,0 +1,256 @@
+REACT.JS FUNDAMENTALS: COMPREHENSIVE TECHNICAL REFERENCE FOR RAG INGESTION
+
+================================================================================
+1. INTRODUCTION TO REACT
+================================================================================
+React is an open-source JavaScript library developed by Meta (formerly Facebook) for building user interfaces, specifically single-page applications (SPAs). 
+
+Core Philosophy:
+- Declarative: Developers describe what the UI should look like for a given application state, and React handles rendering and updates efficiently.
+- Component-Based: Applications are built using encapsulated components that manage their own state and compose together to form complex UIs.
+- Learn Once, Write Anywhere: React code can run on the client, server (Node.js using SSR/SSG), or mobile devices (React Native).
+
+Key Concepts:
+- Virtual DOM: An in-memory representation of the real DOM. React calculates differences (diffing) between the virtual DOM and real DOM to update only modified nodes (reconciliation).
+- Unidirectional Data Flow: Data flows down from parent components to child components via properties (props).
+- JSX: A syntax extension to JavaScript that allows writing HTML-like markup inside JavaScript code.
+
+
+================================================================================
+2. JSX (JAVASCRIPT XML)
+================================================================================
+JSX is an XML-like syntax extension to ECMAScript. It compiles down to React.createElement() function calls via transpilers like Babel or SWC.
+
+Rules of JSX:
+1. Single Root Element: JSX must return a single root element. Multiple elements must be wrapped in a container tag or a React Fragment (<>...</> or <React.Fragment>...</React.Fragment>).
+2. Closing Tags: All tags must be explicitly closed (e.g., <img />, <input />, <br />).
+3. CamelCase Attributes: JSX uses JavaScript property names instead of HTML attribute names (e.g., class becomes className, tabindex becomes tabIndex, onclick becomes onClick).
+4. JavaScript Embedding: Any valid JavaScript expression can be embedded inside JSX using curly braces `{}`.
+
+Example JSX Compilation:
+JSX Input:
+  <div className="container">
+    <h1>Hello {name}</h1>
+  </div>
+
+Compiled Output (JavaScript):
+  React.createElement(
+    'div',
+    { className: 'container' },
+    React.createElement('h1', null, 'Hello ', name)
+  );
+
+
+================================================================================
+3. COMPONENTS & PROPS
+================================================================================
+Components are the building blocks of a React application. They accept inputs (props) and return React elements describing what should appear on the screen.
+
+Types of Components:
+1. Functional Components: JavaScript functions that accept props as an argument and return JSX. Modern React relies almost entirely on functional components with Hooks.
+2. Class Components: ES6 classes extending React.Component. Legacy approach, requiring state management via `this.state` and lifecycle methods like `componentDidMount`.
+
+Props (Properties):
+- Read-Only / Immutable: A component must never modify its own props. Props are passed from parent to child.
+- Children Prop: `props.children` is a special prop that receives the inner content passed between opening and closing component tags.
+- Default Props: Default values can be set using JavaScript default parameters or `Component.defaultProps`.
+
+Example Functional Component with Props:
+```javascript
+function UserCard({ name, role = "User", children }) {
+  return (
+    <div className="card">
+      <h2>{name}</h2>
+      <p>Role: {role}</p>
+      <div className="details">{children}</div>
+    </div>
+  );
+}
+```
+
+
+================================================================================
+4. STATE MANAGEMENT & REACT HOOKS
+================================================================================
+State represents values that change over time and trigger component re-renders when updated. Hooks are built-in functions introduced in React 16.8 that allow functional components to use state and other React features.
+
+Rules of Hooks:
+1. Call Hooks only at the top level of functional components or custom Hooks (never inside loops, conditions, or nested functions).
+2. Call Hooks only from React functional components or custom Hooks.
+
+Core Hooks Reference:
+
+4.1 useState
+Manages local component state.
+Syntax: `const [state, setState] = useState(initialValue);`
+Updating State:
+- Direct value: `setState(newValue)`
+- Functional update (based on previous state): `setState(prev => prev + 1)`
+
+4.2 useEffect
+Handles side effects in functional components (e.g., data fetching, subscriptions, manual DOM mutations).
+Syntax: `useEffect(() => { /* effect code */; return () => { /* cleanup */ }; }, [dependencies]);`
+Dependency Array Scenarios:
+- `undefined` (no array): Runs after EVERY render.
+- `[]` (empty array): Runs ONCE after the initial mount (equivalent to componentDidMount).
+- `[a, b]`: Runs on mount and whenever `a` or `b` changes.
+- Cleanup Function: Executed before component unmounts or before the effect re-runs.
+
+4.3 useContext
+Reads and subscribes to context from parent components, avoiding prop drilling.
+Syntax: `const value = useContext(MyContext);`
+
+4.4 useRef
+Returns a mutable ref object whose `.current` property persists across renders without causing re-renders when updated. Commonly used for DOM element access or storing mutable values.
+Syntax: `const refContainer = useRef(initialValue);`
+
+4.5 useMemo
+Memoizes the result of a calculation to optimize computational performance across renders.
+Syntax: `const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);`
+
+4.6 useCallback
+Memoizes a function definition to prevent re-creation on every render, useful when passing callbacks to optimized child components that rely on reference equality.
+Syntax: `const memoizedCallback = useCallback(() => { doSomething(a, b); }, [a, b]);`
+
+4.7 useReducer
+Alternative to `useState` for managing complex state logic involving multiple sub-values or next-state dependency on previous state.
+Syntax: `const [state, dispatch] = useReducer(reducer, initialArg, init);`
+
+
+================================================================================
+5. EVENT HANDLING
+================================================================================
+React handles events using SyntheticEvents, a cross-browser wrapper around the browser's native event system.
+
+Key Characteristics:
+- Event names are camelCase (e.g., `onClick`, `onChange`, `onSubmit`, `onKeyDown`).
+- Pass function references, not function calls: `onClick={handleClick}` (correct), `onClick={handleClick()}` (incorrect - invokes immediately).
+- Preventing Default Behavior: Must explicitly call `e.preventDefault()`. `return false` does not work in React events.
+
+Example:
+```javascript
+function Form() {
+  function handleSubmit(event) {
+    event.preventDefault();
+    console.log("Form submitted");
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+
+================================================================================
+6. CONDITIONAL RENDERING & LISTS
+================================================================================
+6.1 Conditional Rendering
+React uses standard JavaScript conditionals (if statements, ternary operators, logical AND `&&`) to render elements conditionally.
+
+Techniques:
+- Ternary Operator: `condition ? <ComponentA /> : <ComponentB />`
+- Logical AND: `condition && <ComponentA />` (Note: ensure condition evaluates to a boolean or null/undefined, as `0 && <Component />` renders `0`).
+- Early Return: Returning `null` from a component prevents it from rendering.
+
+6.2 Lists and Keys
+Lists are rendered by iterating over arrays using JavaScript's `.map()` method.
+
+The `key` Prop:
+- React requires a unique `key` prop for each item in a list to track elements across renders during diffing.
+- Keys must be unique among siblings (global uniqueness is not required).
+- Stable IDs (e.g., database primary keys) should be used. Avoid using array indexes as keys if the list order can change, items can be inserted/deleted, or items are filterable.
+
+
+================================================================================
+7. FORMS & CONTROLLED VS UNCONTROLLED COMPONENTS
+================================================================================
+7.1 Controlled Components
+Form elements (input, textarea, select) whose values are controlled entirely by React state.
+- Source of truth: React state.
+- Value attribute bound to state; change handler updates state on input.
+- Provides immediate validation and dynamic control.
+
+7.2 Uncontrolled Components
+Form elements that maintain their own internal state within the DOM.
+- Source of truth: DOM.
+- Values accessed using React `useRef` when submitting the form.
+- Useful for simple forms or integrating with non-React DOM libraries.
+
+
+================================================================================
+8. COMPONENT LIFECYCLE (CLASS COMPONENTS VS HOOK EQUIVALENTS)
+================================================================================
+Class Component Lifecycle Phases:
+1. Mounting:
+   - `constructor()` -> Initializing state and binding methods.
+   - `static getDerivedStateFromProps()` -> Syncing state from props before render.
+   - `render()` -> Returns JSX.
+   - `componentDidMount()` -> Runs once after initial DOM render. Ideal for side effects (API calls).
+2. Updating:
+   - `shouldComponentUpdate()` -> Returns boolean to skip re-rendering for optimization.
+   - `render()` -> Re-renders JSX.
+   - `getSnapshotBeforeUpdate()` -> Captures DOM information before changes are flushed.
+   - `componentDidUpdate()` -> Runs after DOM updates are applied.
+3. Unmounting:
+   - `componentWillUnmount()` -> Cleanup before DOM removal (canceling timers, subscriptions).
+
+Functional Component Hook Equivalents:
+- `componentDidMount`: `useEffect(() => { ... }, [])`
+- `componentDidUpdate`: `useEffect(() => { ... }, [dependencies])`
+- `componentWillUnmount`: `useEffect(() => { return () => { /* cleanup */ }; }, [])`
+- `shouldComponentUpdate`: React.memo wrapper around functional components.
+
+
+================================================================================
+9. CONTEXT API & STATE MANAGEMENT ARCHITECTURE
+================================================================================
+The React Context API solves the "prop drilling" problem by passing data through the component tree without manually threading props down at every level.
+
+Components of Context:
+1. `React.createContext(defaultValue)`: Creates a Context object.
+2. `Context.Provider`: Accepts a `value` prop to pass down to descendant components.
+3. `useContext(Context)` or `Context.Consumer`: Consumes the provided value.
+
+When to Use Context:
+- Theme preferences (Dark/Light mode).
+- Authenticated user data.
+- Preferred language/locale settings.
+
+When NOT to Use Context:
+- Frequent/high-velocity state updates (can lead to unnecessary re-renders of all consumers). For high-frequency state, consider dedicated state management libraries like Redux Toolkit, Zustand, or Jotai.
+
+
+================================================================================
+10. PERFORMANCE OPTIMIZATION TECHNIQUES
+================================================================================
+1. `React.memo`: Higher-order component that memoizes functional components to prevent re-renders if props have not changed.
+2. Code Splitting & Lazy Loading: Using `React.lazy()` and `<Suspense>` to dynamic import components and split JavaScript bundles into smaller chunks.
+3. Virtualization / Windowing: Rendering only visible list items in long scrollable lists (e.g., using libraries like `react-window` or `react-virtualized`).
+4. Stabilizing Callback References: Using `useCallback` for event handlers passed to memoized child components.
+5. Memoizing Expensive Computations: Using `useMemo` to skip re-calculating values on subsequent renders.
+
+
+================================================================================
+11. ERROR BOUNDARIES
+================================================================================
+Error Boundaries are React components that catch JavaScript errors anywhere in their child component tree, log those errors, and display a fallback UI instead of crashing the whole component tree.
+
+Key Notes:
+- Error boundaries MUST be Class components (implementing `static getDerivedStateFromError()` or `componentDidCatch()`).
+- Error boundaries do NOT catch errors in:
+  1. Event handlers (use try/catch blocks instead).
+  2. Asynchronous code (e.g., setTimeout or requestAnimationFrame callbacks).
+  3. Server-side rendering.
+  4. Errors thrown in the error boundary itself.
+
+
+================================================================================
+12. MODERN REACT CONCEPTS (REACT 18+)
+================================================================================
+1. Concurrent React: Enables React to interrupt, pause, resume, or abandon rendering to keep the UI responsive during main-thread tasks.
+2. Automatic Batching: Grouping multiple state updates within standard event handlers, asynchronous callbacks, promises, and timeouts into a single re-render for better performance.
+3. Transitions (`useTransition` / `useDeferredValue`): API for distinguishing between urgent updates (e.g., typing in an input) and non-urgent/transition updates (e.g., filtering a long list).
+4. React Server Components (RSC): Enables components to render exclusively on the server, reducing client bundle sizes and enabling direct database/backend access without client-side API fetches.
